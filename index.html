@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>真・納期ジェネレーター｜「3日で終わる」を現実に変換します</title>
+    <meta name="description" content="あなたの甘々な見積もりに、5つの法則を重ねて"本当の納期"を算出するエンタメツール。">
+
+    <!-- OGP -->
+    <meta property="og:title" content="真・納期ジェネレーター">
+    <meta property="og:description" content="「3日で終わります！」が実際に何日かかるか、5つの法則で容赦なく暴きます。">
+    <meta property="og:type" content="website">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=DotGothic16&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1f1d1a;
+            --paper: #fdf6e3;
+            --accent: #e11d48;
+        }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(at 20% 10%, #fde68a 0%, transparent 50%),
+                radial-gradient(at 85% 30%, #fca5a5 0%, transparent 55%),
+                radial-gradient(at 50% 90%, #c7d2fe 0%, transparent 60%),
+                var(--paper);
+            min-height: 100vh;
+        }
+        .font-mono-jp { font-family: 'DotGothic16', monospace; }
+
+        .stamp {
+            display: inline-block;
+            transform: rotate(-6deg);
+            border: 4px double var(--accent);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            background: rgba(255,255,255,0.6);
+        }
+
+        .card-reveal {
+            opacity: 0;
+            transform: translateY(24px) scale(0.98);
+            animation: reveal 0.55s cubic-bezier(.2,.9,.25,1.05) forwards;
+        }
+        @keyframes reveal {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .bounce-in {
+            animation: bouncein 0.8s cubic-bezier(.2,1.5,.3,1) forwards;
+        }
+        @keyframes bouncein {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .shake { animation: shake 0.5s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .btn-primary {
+            background: var(--ink);
+            color: #fef3c7;
+            border: 3px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--accent);
+            transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+        }
+        .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--accent); }
+        .btn-primary:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--accent); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--ink);
+            border: 2px dashed var(--ink);
+        }
+        .btn-ghost:hover { background: rgba(0,0,0,0.05); }
+
+        .law-card {
+            background: #ffffff;
+            border: 3px solid var(--ink);
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.15);
+        }
+
+        .verdict-card {
+            background: var(--ink);
+            color: #fef3c7;
+            border: 4px solid var(--ink);
+            box-shadow: 8px 8px 0 var(--accent);
+        }
+
+        .diagnose-msg {
+            font-family: 'DotGothic16', monospace;
+            letter-spacing: 0.1em;
+        }
+
+        .multiplier-pulse {
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        /* Kill default number input spinners for cleanliness */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body>
+    <main class="max-w-xl mx-auto px-5 py-8 md:py-14">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <span class="stamp text-xs md:text-sm">容赦なき現実計算</span>
+            <h1 class="mt-5 text-3xl md:text-5xl font-black leading-tight tracking-tight">
+                真・納期<br class="md:hidden">ジェネレーター
+            </h1>
+            <p class="mt-4 text-sm md:text-base text-gray-700 leading-relaxed">
+                あなたの「<span class="font-bold">3日で終わります！</span>」を、<br>
+                5つの法則で<span class="underline decoration-rose-400 decoration-wavy">本当の納期</span>に変換します。
+            </p>
+        </header>
+
+        <!-- Input form -->
+        <section id="input-form" class="law-card rounded-2xl p-6 md:p-8">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">タスク名（任意）</label>
+            <input id="task-name" type="text" maxlength="40"
+                   placeholder="例：資料作成、実装、引越し、夏休みの宿題"
+                   class="w-full p-3 mb-5 bg-amber-50 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-gray-800 transition">
+
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">あなたの見積もり</label>
+            <div class="flex items-center gap-3 mb-6">
+                <input id="days" type="number" min="1" max="365" value="3"
+                       class="flex-1 p-4 text-3xl font-black text-right bg-amber-50 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-gray-800 transition">
+                <span class="text-2xl font-black">日</span>
+            </div>
+
+            <button id="submit" class="btn-primary w-full p-4 rounded-lg font-black text-lg">
+                ▶ 真の納期を判定する
+            </button>
+
+            <p class="mt-4 text-xs text-gray-500 text-center leading-relaxed">
+                ※ このツールは過去の統計と先人の叡智（法則）に基づいて、<br>
+                あなたの見積もりに現実的な補正を加えます。
+            </p>
+        </section>
+
+        <!-- Loading -->
+        <section id="loading" class="hidden text-center py-12">
+            <div class="inline-block text-4xl multiplier-pulse">🔮</div>
+            <p id="diagnose-msg" class="diagnose-msg mt-4 text-sm">診断中...</p>
+        </section>
+
+        <!-- Results -->
+        <section id="results" class="hidden">
+            <!-- Law cards appear here -->
+            <div id="law-cards" class="space-y-4"></div>
+            <!-- Final verdict here -->
+            <div id="final-verdict" class="mt-6"></div>
+            <!-- Actions -->
+            <div id="actions" class="hidden mt-6 space-y-3">
+                <button id="share" class="btn-primary w-full p-4 rounded-lg font-black">
+                    𝕏 この結果をシェアして仲間を道連れにする
+                </button>
+                <button id="reset" class="btn-ghost w-full p-3 rounded-lg font-bold">
+                    もう一度べつの見積もりで試す
+                </button>
+            </div>
+        </section>
+
+        <footer class="mt-12 text-center text-xs text-gray-500">
+            <p>© 真・納期ジェネレーター</p>
+            <p class="mt-1">※ 本ツールは娯楽目的です。実際の納期は現場の上司と交渉してください。</p>
+        </footer>
+    </main>
+
+    <script>
+        // ------------------------------------------------------------
+        // 法則データ
+        // ------------------------------------------------------------
+        const LAWS = [
+            {
+                emoji: '📊',
+                name: 'プランニング・ファラシー',
+                subtitle: 'Planning Fallacy',
+                origin: 'ダニエル・カーネマン／エイモス・トベルスキー（1979年提唱）',
+                quote: '「人は自分の計画の所要時間を、一貫して過小評価する。」',
+                apply: (original, current) => Math.max(1, Math.ceil(original * 0.3)),
+                commentary: (delta) => `あなたの脳内予報は、いつも快晴・追い風・ベストコンディション。\n現実はだいたい小雨です。`
+            },
+            {
+                emoji: '🌀',
+                name: 'ホフスタッターの法則',
+                subtitle: "Hofstadter's Law",
+                origin: 'ダグラス・ホフスタッター『ゲーデル、エッシャー、バッハ』',
+                quote: '「物事は常に予測以上に時間がかかる ―― ホフスタッターの法則を計算に入れても、なお。」',
+                apply: (original, current) => current,
+                commentary: (delta) => `いま計算した値そのものが、まだ甘い。\n「織り込み済み」と思ったその瞬間に、もう1回折り込まれます。`
+            },
+            {
+                emoji: '📐',
+                name: '90-90の法則',
+                subtitle: 'Ninety-Ninety Rule',
+                origin: 'トム・カーギル（Bell Labs, 1985年）',
+                quote: '「最初の90%のコードは開発時間の90%を占める。\n残り10%のコードは、もう90%の時間を占める。」',
+                apply: (original, current) => Math.max(1, Math.ceil(current * 0.5)),
+                commentary: (delta) => `"あと少し"という名のラスボスが待っています。\n仕上げ、微調整、確認、やり直し。ぜんぶここ。`
+            },
+            {
+                emoji: '⏳',
+                name: 'パーキンソンの法則',
+                subtitle: "Parkinson's Law",
+                origin: 'C.N.パーキンソン（1955年, 英エコノミスト誌）',
+                quote: '「仕事の量は、完成のために与えられた時間をすべて満たすまで膨張する。」',
+                apply: (original, current) => {
+                    const rem = current % 7;
+                    return rem === 0 ? 3 : (7 - rem);
+                },
+                commentary: (delta) => `時間があると、時間を使う。\nなぜか週末ギリギリに着地するのはあなたの怠慢ではなく、物理法則です。`
+            },
+            {
+                emoji: '💥',
+                name: 'マーフィーの法則',
+                subtitle: "Murphy's Law",
+                origin: 'エドワード・マーフィー・ジュニア（空軍技師, 1949年）',
+                quote: '「失敗する可能性のあるものは、いつか必ず失敗する。」',
+                _reasons: [
+                    '同時に2つの風邪をひく',
+                    'PCのSSDが "ちょうど今" 寿命を迎える',
+                    '猫が資料の上に居座って動かない',
+                    'エアコンが壊れて作業環境が灼熱に',
+                    'Wi-Fiが原因不明で落ちる夜が3回続く',
+                    '担当者から「要件、ちょっと変わりました！」の連絡',
+                    '急な飲み会 → 翌日KO',
+                    'Slackで飛んでくる "ちょっといいですか？" × 5',
+                    '"5分だけ" のTikTokが気づくと2時間',
+                    '友人から急な引越し手伝いのお願い',
+                    '歯医者の定期検診が運悪く虫歯発覚',
+                    '自治体から書類が届き役所に行く羽目に',
+                    'コンビニで発売された新商品を全部試したくなる',
+                    '推しが急に新曲を出す',
+                    '睡眠アプリが「今日は眠りが浅いです」と告知'
+                ],
+                apply: (original, current) => 1 + Math.floor(Math.random() * 3),
+                commentary: function(delta) {
+                    const r = this._reasons[Math.floor(Math.random() * this._reasons.length)];
+                    return `今回のトラブル抽選結果：「${r}」\nあなたが悪いわけじゃない。法則が起こしたのです。`;
+                }
+            }
+        ];
+
+        const DIAGNOSE_MSGS = [
+            '脳内時計と現実を照合中...',
+            '過去のあなたの実績を参照中...',
+            '先人の叡智を読み込み中...',
+            '仕事の神様に相談中...',
+            '現実の重力を加算中...',
+            '甘さセンサーが反応しました...'
+        ];
+
+        // ------------------------------------------------------------
+        // ロジック
+        // ------------------------------------------------------------
+        const $ = (id) => document.getElementById(id);
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+        let state = { original: 0, current: 0, taskName: '', applied: [] };
+
+        $('submit').addEventListener('click', startDiagnosis);
+        $('days').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') startDiagnosis();
+        });
+
+        async function startDiagnosis() {
+            const raw = $('days').value;
+            const days = parseInt(raw, 10);
+            if (!days || days <= 0) {
+                const form = $('input-form');
+                form.classList.add('shake');
+                setTimeout(() => form.classList.remove('shake'), 500);
+                return;
+            }
+            if (days > 365) {
+                alert('365日以下で入力してください。それ以上は…もう転職を検討しましょう。');
+                return;
+            }
+
+            state.original = days;
+            state.current = days;
+            state.taskName = ($('task-name').value || '').trim();
+            state.applied = [];
+
+            $('input-form').classList.add('hidden');
+            $('loading').classList.remove('hidden');
+            $('results').classList.add('hidden');
+            $('law-cards').innerHTML = '';
+            $('final-verdict').innerHTML = '';
+            $('actions').classList.add('hidden');
+
+            // Fun loading
+            for (let i = 0; i < 3; i++) {
+                $('diagnose-msg').textContent = DIAGNOSE_MSGS[Math.floor(Math.random() * DIAGNOSE_MSGS.length)];
+                await sleep(500);
+            }
+            $('loading').classList.add('hidden');
+            $('results').classList.remove('hidden');
+
+            // Apply laws one by one
+            for (const law of LAWS) {
+                await sleep(450);
+                const delta = Math.max(0, law.apply(state.original, state.current));
+                state.current += delta;
+                state.applied.push({ law, delta, afterTotal: state.current });
+                renderLawCard(law, delta, state.current);
+                // Scroll card into view
+                $('results').lastElementChild;
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
+
+            await sleep(700);
+            renderFinalVerdict();
+            await sleep(300);
+            $('actions').classList.remove('hidden');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function renderLawCard(law, delta, runningTotal) {
+            const comment = typeof law.commentary === 'function'
+                ? law.commentary.call(law, delta)
+                : law.commentary;
+            const div = document.createElement('article');
+            div.className = 'card-reveal law-card rounded-xl p-5';
+            div.innerHTML = `
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-3xl">${escapeHtml(law.emoji)}</span>
+                        <div>
+                            <div class="font-black text-lg leading-tight">${escapeHtml(law.name)}</div>
+                            <div class="text-xs text-gray-500">${escapeHtml(law.subtitle)}</div>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <div class="text-xs text-gray-500">+</div>
+                        <div class="text-2xl font-black text-rose-600 leading-none">${delta}<span class="text-sm">日</span></div>
+                    </div>
+                </div>
+                <blockquote class="mt-4 pl-3 border-l-4 border-amber-400 text-sm italic text-gray-700 whitespace-pre-line">${escapeHtml(law.quote)}</blockquote>
+                <p class="mt-3 text-xs text-gray-500">出典：${escapeHtml(law.origin)}</p>
+                <p class="mt-3 text-sm whitespace-pre-line">${escapeHtml(comment)}</p>
+                <div class="mt-4 pt-3 border-t border-dashed border-gray-300 text-xs text-gray-500 flex justify-between">
+                    <span>これまでの合計</span>
+                    <span class="font-mono-jp text-gray-800">${runningTotal}日</span>
+                </div>
+            `;
+            $('law-cards').appendChild(div);
+        }
+
+        function renderFinalVerdict() {
+            const deadline = new Date();
+            deadline.setDate(deadline.getDate() + state.current);
+            const wd = ['日','月','火','水','木','金','土'][deadline.getDay()];
+            const dateStr = `${deadline.getFullYear()}年${deadline.getMonth() + 1}月${deadline.getDate()}日（${wd}）`;
+            const multiplier = (state.current / state.original).toFixed(1);
+            const taskStr = state.taskName ? `「${state.taskName}」は` : 'あなたのタスクは';
+            const wordForMultiplier = pickMultiplierLabel(parseFloat(multiplier));
+
+            $('final-verdict').innerHTML = `
+                <div class="verdict-card rounded-2xl p-6 md:p-8 bounce-in">
+                    <div class="text-xs opacity-70 tracking-widest">▼ 真の納期 ▼</div>
+                    <div class="mt-2 text-sm opacity-80">${escapeHtml(taskStr)}、自称「${state.original}日」ですが…</div>
+                    <div class="mt-4 flex items-end gap-2">
+                        <div class="text-6xl md:text-7xl font-black leading-none">${state.current}</div>
+                        <div class="text-2xl font-black pb-1">日</div>
+                        <div class="ml-auto stamp text-xs" style="color:#fef3c7; border-color:#fef3c7; background:transparent;">×${multiplier}</div>
+                    </div>
+                    <div class="mt-3 text-sm opacity-90">⇒ ${escapeHtml(dateStr)} 着地予定</div>
+                    <div class="mt-5 pt-4 border-t border-amber-100/30 text-sm leading-relaxed">
+                        ${escapeHtml(wordForMultiplier)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function pickMultiplierLabel(m) {
+            if (m < 2) return '比較的マトモな見積もり。でも油断は禁物。';
+            if (m < 3) return '典型的な楽観バイアス。上司に先に伝えておきましょう。';
+            if (m < 5) return 'これはもう「見積もり」ではなく「願望」です。';
+            if (m < 8) return '見積もりと現実の間に、太平洋が広がっています。';
+            return '見積もりというより、もはや創作です。就寝前の妄想レベル。';
+        }
+
+        $('share').addEventListener('click', () => {
+            const task = state.taskName || 'このタスク';
+            const text = `「${task}」の見積もり：${state.original}日\n` +
+                         `↓ 5つの法則を適用\n` +
+                         `真の納期：${state.current}日（×${(state.current / state.original).toFixed(1)}）\n\n` +
+                         `#真の納期ジェネレーター`;
+            const url = location.href;
+            const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(intent, '_blank', 'noopener');
+        });
+
+        $('reset').addEventListener('click', () => {
+            $('results').classList.add('hidden');
+            $('input-form').classList.remove('hidden');
+            $('law-cards').innerHTML = '';
+            $('final-verdict').innerHTML = '';
+            $('actions').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+    </script>
+</body>
+</html>

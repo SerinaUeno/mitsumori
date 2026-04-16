@@ -36,6 +36,20 @@
                 var(--paper);
             min-height: 100vh;
         }
+
+        /* 横幅制御（Tailwind CDN が遅延しても効くように素のCSSで） */
+        main.container {
+            width: 100%;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 2rem 1.25rem;
+            box-sizing: border-box;
+        }
+        @media (min-width: 768px) {
+            main.container { padding: 3rem 1.25rem 4rem; }
+        }
+
         .font-mono-jp { font-family: 'DotGothic16', monospace; }
 
         .stamp {
@@ -125,7 +139,7 @@
     </style>
 </head>
 <body>
-    <main class="max-w-xl mx-auto px-5 py-8 md:py-14">
+    <main class="container max-w-[480px] mx-auto px-5 py-8 md:py-14">
 
         <!-- Header -->
         <header class="text-center mb-8">
